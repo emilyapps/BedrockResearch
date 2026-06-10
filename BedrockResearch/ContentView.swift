@@ -1,80 +1,130 @@
-//
-//  ContentView.swift
-//  BedrockResearch
-//
-//  Created by Emily Stein on 6/9/26.
-//
-
 import SwiftUI
-import SwiftData
 
 struct ContentView: View {
-    @Environment(\.modelContext) private var modelContext
-    @Query private var items: [Item]
+    @Environment(AppState.self) private var appState
 
     var body: some View {
-        NavigationViewWrapper {
-            List {
-                ForEach(items) { item in
-                    NavigationLink {
-                        Text("Item at \(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))")
-                    } label: {
-                        Text(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))
-                    }
-                }
-                .onDelete(perform: deleteItems)
-            }
-#if os(macOS)
-            .navigationSplitViewColumnWidth(min: 180, ideal: 200)
-#endif
-            .toolbar {
-#if os(iOS)
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    EditButton()
-                }
-#endif
-                ToolbarItem {
-                    Button(action: addItem) {
-                        Label("Add Item", systemImage: "plus")
-                    }
-                }
-            }
-        }
-    }
+        @Bindable var appState = appState
 
-    private func addItem() {
-        withAnimation {
-            let newItem = Item(timestamp: Date())
-            modelContext.insert(newItem)
-        }
-    }
-
-    private func deleteItems(offsets: IndexSet) {
-        withAnimation {
-            for index in offsets {
-                modelContext.delete(items[index])
-            }
-        }
-    }
-}
-
-fileprivate struct NavigationViewWrapper<Content: View>: View {
-    let content: () -> Content
-
-    var body: some View {
-#if os(macOS)
         NavigationSplitView {
-            content()
+            SidebarView()
+                .environment(appState)
+                .navigationSplitViewColumnWidth(min: 200, ideal: 240)
         } detail: {
-            Text("Select an item")
+            ChatView()
+                .environment(appState)
         }
-#else
-        content()
-#endif
+        .inspector(isPresented: $appState.inspectorVisible) {
+            InspectorView()
+                .environment(appState)
+                .inspectorColumnWidth(min: 260, ideal: 300, max: 460)
+        }
+        .toolbar {
+            ToolbarItem(placement: .navigation) {
+                Button {
+                    appState.newChat()
+                } label: {
+                    Label("New Chat", systemImage: "square.and.pencil")
+                }
+                .disabled(appState.queryInFlight)
+                .help("New Chat (⌘N)")
+            }
+
+            ToolbarItem(placement: .primaryAction) {
+                Button {
+                    appState.inspectorVisible.toggle()
+                } label: {
+                    Label("Toggle Inspector", systemImage: "sidebar.trailing")
+                }
+            }
+        }
+        .overlay(alignment: .top) {
+            if appState.serverStatus == .offline {
+                OfflineBanner()
+                    .environment(appState)
+            }
+        }
     }
 }
 
-#Preview {
-    ContentView()
-        .modelContainer(for: Item.self, inMemory: true)
+private struct OfflineBanner: View {
+    @Environment(AppState.self) private var appState
+
+    var body: some View {
+        HStack(spacing: 8) {
+            Image(systemName: "wifi.slash")
+            Text("Server offline — start with ")
+            Text("`python3 -m bedrock serve`")
+                .fontDesign(.monospaced)
+            Spacer()
+            Button("Retry") {
+                appState.pingHealth()
+            }
+            .buttonStyle(.borderedProminent)
+            .controlSize(.small)
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 8)
+        .background(.yellow.opacity(0.85))
+        .foregroundStyle(.black)
+    }
+}
+
+private struct SidebarView: View {
+    @Environment(AppState.self) private var appState
+
+    var body: some View {
+        @Bindable var appState = appState
+
+        VStack(spacing: 0) {
+            Picker("", selection: $appState.sidebarTab) {
+                Text("Sessions").tag(AppState.SidebarTab.sessions)
+                Text("Documents").tag(AppState.SidebarTab.documents)
+            }
+            .pickerStyle(.segmented)
+            .padding(.horizontal, 12)
+            .padding(.vertical, 8)
+
+            Divider()
+
+            switch appState.sidebarTab {
+            case .sessions:
+                SessionsSidebar()
+                    .environment(appState)
+            case .documents:
+                DocumentsSidebar()
+                    .environment(appState)
+            }
+        }
+        .navigationTitle(appState.displayName.isEmpty ? "Bedrock Research" : appState.displayName)
+    }
+}
+
+private struct InspectorView: View {
+    @Environment(AppState.self) private var appState
+
+    var body: some View {
+        @Bindable var appState = appState
+
+        VStack(spacing: 0) {
+            Picker("", selection: $appState.inspectorTab) {
+                Text("Sources").tag(AppState.InspectorTab.sources)
+                Text("Trace").tag(AppState.InspectorTab.trace)
+            }
+            .pickerStyle(.segmented)
+            .padding(.horizontal, 12)
+            .padding(.vertical, 8)
+
+            Divider()
+
+            switch appState.inspectorTab {
+            case .sources:
+                SourcesPanel()
+                    .environment(appState)
+            case .trace:
+                TracePanel()
+                    .environment(appState)
+            }
+        }
+    }
 }

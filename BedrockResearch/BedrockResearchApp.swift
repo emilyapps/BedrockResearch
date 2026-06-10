@@ -1,32 +1,32 @@
-//
-//  BedrockResearchApp.swift
-//  BedrockResearch
-//
-//  Created by Emily Stein on 6/9/26.
-//
-
 import SwiftUI
-import SwiftData
 
 @main
 struct BedrockResearchApp: App {
-    var sharedModelContainer: ModelContainer = {
-        let schema = Schema([
-            Item.self,
-        ])
-        let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
-
-        do {
-            return try ModelContainer(for: schema, configurations: [modelConfiguration])
-        } catch {
-            fatalError("Could not create ModelContainer: \(error)")
-        }
-    }()
+    @State private var appState = AppState()
 
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .environment(appState)
+                .onAppear {
+                    appState.pingHealth()
+                    appState.loadSessions()
+                    appState.loadDocuments()
+                }
         }
-        .modelContainer(sharedModelContainer)
+        .commands {
+            CommandGroup(after: .newItem) {
+                Button("New Chat") {
+                    appState.newChat()
+                }
+                .keyboardShortcut("n", modifiers: .command)
+                .disabled(appState.queryInFlight)
+            }
+        }
+
+        Settings {
+            SettingsView()
+                .environment(appState)
+        }
     }
 }
