@@ -132,7 +132,7 @@ actor APIClient {
                     var dataLines: [String] = []
 
                     // Flushes the currently-buffered event (if any) and yields it.
-                    // Returns true if the stream should stop (error/sources).
+                    // Returns true if the stream should stop (error/trace).
                     // Some transports don't deliver the SSE blank-line separator as its
                     // own line, so we also flush whenever a new "event:" line starts and
                     // once more at end-of-stream.
@@ -147,7 +147,7 @@ actor APIClient {
                         }
                         continuation.yield(event)
                         switch event {
-                        case .error, .sources: return true
+                        case .error, .trace: return true
                         default: return false
                         }
                     }
@@ -202,6 +202,15 @@ actor APIClient {
                   let sourcesData = try? JSONSerialization.data(withJSONObject: arr),
                   let nodes = try? JSONDecoder().decode([SourceNode].self, from: sourcesData) else { return nil }
             return .sources(nodes)
+
+        case "trace":
+            guard let arr = json?["per_call"] as? [[String: Any]] else {
+                return .trace(calls: [])
+            }
+            guard let traceData = try? JSONSerialization.data(withJSONObject: arr),
+                  var calls = try? JSONDecoder().decode([TraceCall].self, from: traceData) else { return nil }
+            for i in calls.indices { calls[i].index = i }
+            return .trace(calls: calls)
 
         case "error":
             return .error(message: json?["message"] as? String ?? "Unknown error")

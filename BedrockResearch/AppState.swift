@@ -134,9 +134,7 @@ final class AppState {
         let toolName = selectedRecipe.toolName
 
         Task { @MainActor in
-            var collectedSources: [SourceNode] = []
-            var collectedTrace: [TraceCall] = []
-            var traceIndex = 0
+            var toolSelectedCount = 0
 
             let (stream, sessionIdHeader) = await client.query(text: text, sessionId: sessionId, tool: toolName)
 
@@ -148,38 +146,34 @@ final class AppState {
                             self.currentSessionId = id
                         }
 
-                    case .routing(let q):
+                    case .routing:
                         self.pendingMilestone = "Routing query…"
-                        var call = TraceCall(tool: nil, query: q, filters: nil, variants: nil)
-                        call.index = traceIndex; traceIndex += 1
-                        collectedTrace.append(call)
 
                     case .toolSelected(let tool):
+                        toolSelectedCount += 1
                         self.pendingMilestone = "Using \(tool.replacingOccurrences(of: "_", with: " "))…"
-                        if let last = collectedTrace.indices.last {
-                            collectedTrace[last] = TraceCall(tool: tool, query: collectedTrace[last].query, filters: nil, variants: nil)
-                        }
 
-                    case .retrieving(let q):
-                        let suffix = collectedTrace.filter { $0.tool != nil }.count
-                        self.pendingMilestone = suffix > 1 ? "Retrieving (\(suffix) sub-queries)…" : "Retrieving…"
-                        var call = TraceCall(tool: nil, query: q, filters: self.activeFilter.isEmpty ? nil : self.activeFilter, variants: nil)
-                        call.index = traceIndex; traceIndex += 1
-                        collectedTrace.append(call)
+                    case .retrieving:
+                        self.pendingMilestone = toolSelectedCount > 1 ? "Retrieving (\(toolSelectedCount) sub-queries)…" : "Retrieving…"
 
                     case .answer(let text):
                         self.pendingMilestone = nil
                         let answerId = UUID()
-                        self.chatEntries.append(.assistantMessage(id: answerId, text: text, sources: [], traceCalls: collectedTrace))
+                        self.chatEntries.append(.assistantMessage(id: answerId, text: text, sources: [], traceCalls: []))
 
                     case .sources(let nodes):
-                        collectedSources = nodes
                         if let last = self.chatEntries.indices.last,
                            case .assistantMessage(let id, let t, _, let tc) = self.chatEntries[last] {
                             self.chatEntries[last] = .assistantMessage(id: id, text: t, sources: nodes, traceCalls: tc)
                         }
                         self.pinnedSources = nodes
-                        self.pinnedTrace = collectedTrace
+
+                    case .trace(let calls):
+                        if let last = self.chatEntries.indices.last,
+                           case .assistantMessage(let id, let t, let s, _) = self.chatEntries[last] {
+                            self.chatEntries[last] = .assistantMessage(id: id, text: t, sources: s, traceCalls: calls)
+                        }
+                        self.pinnedTrace = calls
 
                     case .error(let msg):
                         self.pendingMilestone = nil
@@ -196,7 +190,6 @@ final class AppState {
             if self.currentSessionId == nil, let sid = sessionIdHeader() {
                 self.currentSessionId = sid
             }
-            _ = collectedSources
             self.queryInFlight = false
         }
     }

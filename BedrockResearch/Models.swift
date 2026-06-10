@@ -64,34 +64,68 @@ struct FilterResponse: Codable {
 
 // MARK: - Sources / retrieval
 
-struct SourceNode: Identifiable, Codable {
+struct SourceNode: Identifiable, Decodable {
+    let id = UUID()
     let rank: Int
     let score: Double?
     let shortName: String?
     let file: String
     let text: String
 
-    var id: Int { rank }
-
     enum CodingKeys: String, CodingKey {
         case rank, score, file, text
         case shortName = "short_name"
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        rank = try container.decode(Int.self, forKey: .rank)
+        score = try container.decodeIfPresent(Double.self, forKey: .score)
+        shortName = try container.decodeIfPresent(String.self, forKey: .shortName)
+        file = try container.decode(String.self, forKey: .file)
+        text = try container.decode(String.self, forKey: .text)
     }
 }
 
 // MARK: - Trace
 
-struct TraceCall: Identifiable, Codable {
-    var id: Int { index }
+struct TraceCall: Identifiable, Decodable {
+    let id = UUID()
     var index: Int = 0
     let tool: String?
     let query: String?
+    let shortName: String?
+    let field: String?
+    let value: String?
     let filters: [FilterClause]?
+    let filterFallback: Bool?
     let variants: [String]?
+    let subQuestions: [String]?
+    let intermediateAnswer: String?
+    let sources: [SourceNode]?
 
     enum CodingKeys: String, CodingKey {
-        case tool, query, filters
+        case tool, query, filters, sources, field, value
+        case shortName = "short_name"
+        case filterFallback = "filter_fallback"
         case variants = "query_variants"
+        case subQuestions = "sub_questions"
+        case intermediateAnswer = "intermediate_answer"
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        tool = try container.decodeIfPresent(String.self, forKey: .tool)
+        query = try container.decodeIfPresent(String.self, forKey: .query)
+        shortName = try container.decodeIfPresent(String.self, forKey: .shortName)
+        field = try container.decodeIfPresent(String.self, forKey: .field)
+        value = try container.decodeIfPresent(String.self, forKey: .value)
+        filters = try container.decodeIfPresent([FilterClause].self, forKey: .filters)
+        filterFallback = try container.decodeIfPresent(Bool.self, forKey: .filterFallback)
+        variants = try container.decodeIfPresent([String].self, forKey: .variants)
+        subQuestions = try container.decodeIfPresent([String].self, forKey: .subQuestions)
+        intermediateAnswer = try container.decodeIfPresent(String.self, forKey: .intermediateAnswer)
+        sources = try container.decodeIfPresent([SourceNode].self, forKey: .sources)
     }
 }
 
@@ -140,5 +174,6 @@ enum SSEEvent {
     case retrieving(query: String)
     case answer(text: String)
     case sources([SourceNode])
+    case trace(calls: [TraceCall])
     case error(message: String)
 }

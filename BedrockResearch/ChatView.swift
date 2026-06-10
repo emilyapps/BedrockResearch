@@ -60,7 +60,7 @@ private struct ChatBubbleView: View {
                     .foregroundStyle(.white)
             }
 
-        case .assistantMessage(_, let text, let sources, _):
+        case .assistantMessage(_, let text, let sources, let traceCalls):
             VStack(alignment: .leading, spacing: 6) {
                 Text((try? AttributedString(markdown: text, options: .init(interpretedSyntax: .inlineOnlyPreservingWhitespace))) ?? AttributedString(text))
                     .textSelection(.enabled)
@@ -69,15 +69,21 @@ private struct ChatBubbleView: View {
                     .background(.quaternary, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
                     .frame(maxWidth: .infinity, alignment: .leading)
 
-                if !sources.isEmpty {
+                if !sources.isEmpty || !traceCalls.isEmpty {
                     Button {
                         appState.pinMessage(entry)
-                        appState.inspectorTab = .sources
+                        appState.inspectorTab = sources.isEmpty ? .trace : .sources
                         appState.inspectorVisible = true
                     } label: {
-                        Label("\(sources.count) source\(sources.count == 1 ? "" : "s")", systemImage: "doc.text.magnifyingglass")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
+                        Group {
+                            if !sources.isEmpty {
+                                Label("\(sources.count) source\(sources.count == 1 ? "" : "s")", systemImage: "doc.text.magnifyingglass")
+                            } else {
+                                Label("\(traceCalls.count) step\(traceCalls.count == 1 ? "" : "s")", systemImage: "list.bullet.rectangle")
+                            }
+                        }
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
                     }
                     .buttonStyle(.plain)
                     .padding(.leading, 14)

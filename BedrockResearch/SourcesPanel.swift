@@ -19,7 +19,7 @@ struct SourcesPanel: View {
     }
 }
 
-private struct SourceNodeRow: View {
+struct SourceNodeRow: View {
     let node: SourceNode
     @State private var expanded = false
 
@@ -50,6 +50,7 @@ private struct SourceNodeRow: View {
                 .font(.caption)
                 .foregroundStyle(.secondary)
                 .lineLimit(expanded ? nil : 4)
+                .fixedSize(horizontal: false, vertical: true)
 
             if node.text.count > 150 {
                 Button(expanded ? "Show less" : "Show more") {
