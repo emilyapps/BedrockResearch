@@ -11,10 +11,17 @@ struct TracePanel: View {
                 description: Text("Tap a response to see its trace here.")
             )
         } else {
-            List(appState.pinnedTrace) { call in
-                TraceCallRow(call: call)
+            ScrollView {
+                LazyVStack(alignment: .leading, spacing: 0) {
+                    ForEach(appState.pinnedTrace) { call in
+                        TraceCallRow(call: call)
+                        if call.id != appState.pinnedTrace.last?.id {
+                            Divider()
+                        }
+                    }
+                }
+                .padding(.horizontal, 12)
             }
-            .listStyle(.plain)
         }
     }
 }

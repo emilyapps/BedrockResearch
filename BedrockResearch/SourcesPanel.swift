@@ -11,10 +11,17 @@ struct SourcesPanel: View {
                 description: Text("Tap a response to pin its sources here.")
             )
         } else {
-            List(appState.pinnedSources) { node in
-                SourceNodeRow(node: node)
+            ScrollView {
+                LazyVStack(alignment: .leading, spacing: 0) {
+                    ForEach(appState.pinnedSources) { node in
+                        SourceNodeRow(node: node)
+                        if node.id != appState.pinnedSources.last?.id {
+                            Divider()
+                        }
+                    }
+                }
+                .padding(.horizontal, 12)
             }
-            .listStyle(.plain)
         }
     }
 }
