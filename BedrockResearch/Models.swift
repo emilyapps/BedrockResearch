@@ -9,10 +9,14 @@ enum ServerStatus {
 struct ServerInfo: Codable {
     let status: String
     let displayName: String
+    let embedModel: String
+    let llmModel: String
 
     enum CodingKeys: String, CodingKey {
         case status
         case displayName = "display_name"
+        case embedModel = "embed_model"
+        case llmModel = "llm_model"
     }
 }
 

@@ -22,6 +22,8 @@ final class AppState {
 
     var serverStatus: ServerStatus = .unknown
     var displayName: String = ""
+    var embedModel: String = ""
+    var llmModel: String = ""
     private var healthRetryTask: Task<Void, Never>?
 
     // MARK: - Session
@@ -93,6 +95,8 @@ final class AppState {
             let info = try await client.fetchHealth()
             serverStatus = .online
             displayName = info.displayName
+            embedModel = info.embedModel
+            llmModel = info.llmModel
         } catch {
             serverStatus = .offline
             scheduleHealthRetry()

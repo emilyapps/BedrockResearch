@@ -19,10 +19,28 @@ struct TracePanel: View {
                             Divider()
                         }
                     }
+                    if !appState.embedModel.isEmpty || !appState.llmModel.isEmpty {
+                        Divider()
+                        modelInfoRow
+                    }
                 }
                 .padding(.horizontal, 12)
             }
         }
+    }
+
+    private var modelInfoRow: some View {
+        HStack(spacing: 12) {
+            if !appState.embedModel.isEmpty {
+                Text("embed: \(appState.embedModel)")
+            }
+            if !appState.llmModel.isEmpty {
+                Text("llm: \(appState.llmModel)")
+            }
+        }
+        .font(.caption2)
+        .foregroundStyle(.secondary)
+        .padding(.vertical, 6)
     }
 }
 
