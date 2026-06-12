@@ -54,6 +54,7 @@ private struct TraceCallRow: View {
             || !(call.subQuestions ?? []).isEmpty
             || call.intermediateAnswer != nil
             || !(call.sources ?? []).isEmpty
+            || !(call.parameters ?? [:]).isEmpty
     }
 
     private var summaryText: String {
@@ -72,6 +73,7 @@ private struct TraceCallRow: View {
                 variantsRow
                 subQuestionsRow
                 answerRow
+                parametersRow
                 sourcesRow
             }
             .padding(.vertical, 4)
@@ -201,6 +203,21 @@ private struct TraceCallRow: View {
                     .foregroundStyle(.blue)
                     .padding(.leading, 70)
                 }
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var parametersRow: some View {
+        if let params = call.parameters, !params.isEmpty {
+            HStack(alignment: .top, spacing: 6) {
+                Text("Parameters")
+                    .appFont(.caption.bold())
+                    .foregroundStyle(.secondary)
+                    .frame(width: 64, alignment: .trailing)
+                Text(params.sorted(by: { $0.key < $1.key }).map { "\($0.key)=\($0.value)" }.joined(separator: ", "))
+                    .appFont(.caption)
+                    .foregroundStyle(.secondary)
             }
         }
     }

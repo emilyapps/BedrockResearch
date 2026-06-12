@@ -108,9 +108,10 @@ struct TraceCall: Identifiable, Decodable {
     let subQuestions: [String]?
     let intermediateAnswer: String?
     let sources: [SourceNode]?
+    let parameters: [String: Int]?
 
     enum CodingKeys: String, CodingKey {
-        case tool, query, filters, sources, field, value
+        case tool, query, filters, sources, field, value, parameters
         case shortName = "short_name"
         case filterFallback = "filter_fallback"
         case variants = "query_variants"
@@ -131,6 +132,7 @@ struct TraceCall: Identifiable, Decodable {
         subQuestions = try container.decodeIfPresent([String].self, forKey: .subQuestions)
         intermediateAnswer = try container.decodeIfPresent(String.self, forKey: .intermediateAnswer)
         sources = try container.decodeIfPresent([SourceNode].self, forKey: .sources)
+        parameters = try container.decodeIfPresent([String: Int].self, forKey: .parameters)
     }
 }
 
@@ -156,6 +158,7 @@ enum Recipe: String, CaseIterable, Identifiable {
     case thorough    = "Thorough"
     case perspectives = "Perspectives"
     case decompose   = "Decompose"
+    case accumulate  = "Accumulate"
     case outline     = "Outline"
 
     var id: String { rawValue }
@@ -167,18 +170,20 @@ enum Recipe: String, CaseIterable, Identifiable {
         case .thorough:     return "search_thorough"
         case .perspectives: return "search_perspectives"
         case .decompose:    return "decompose"
+        case .accumulate:   return "accumulate"
         case .outline:      return "outline_document"
         }
     }
 
     var helpText: String {
         switch self {
-        case .auto:         return "Let the assistant pick the best approach for your question."
-        case .factual:      return "Quick, focused answer from a small set of top passages."
-        case .thorough:     return "Deeper search across more passages for a more complete answer."
-        case .perspectives: return "Surface multiple viewpoints or points of disagreement across sources."
-        case .decompose:    return "Break the question into sub-questions and synthesize an answer from each."
-        case .outline:      return "Structural outline of a single document."
+        case .auto:         return "Let the assistant pick the best approach for your question; infers the right strategy and metadate filters from your questions."
+        case .factual:      return "Narrow, focused lookup: auto-filter, multiquery expansion, compact synthesis (topk=16, topn=10)."
+        case .thorough:     return "Broader search for a more complex Q&A: auto-filter, multiquery expansion, hierarchical synthesis (topk=40, topn=20)."
+        case .perspectives: return "Surface multiple viewpoints: auto-filter, multiquery expansion, refine synthesis (each source updates the running answer (topk=30, topn=15). Expensive and slow."
+        case .decompose:    return "Break an expansive question into sub-questions and synthesize an answer from each set of returned sources (retrieves in parallel, single hierarchical synthesis)."
+        case .accumulate:   return "Corpus-wide sweep: retrieves globally (topk=60), groups by document, then reranks and synthesizes per document — one bullet per matching source. Good for 'what does each document say about X'."
+        case .outline:      return "Comprehensive coverage of a single document: no multiquery expansion, topk=50, no reranker, hierarchical synthesis."
         }
     }
 }
