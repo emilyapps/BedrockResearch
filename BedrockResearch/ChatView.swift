@@ -1,4 +1,5 @@
 import SwiftUI
+import Textual
 
 struct ChatView: View {
     @Environment(AppState.self) private var appState
@@ -54,6 +55,7 @@ private struct ChatBubbleView: View {
             HStack {
                 Spacer(minLength: 60)
                 Text(text)
+                    .appFont(.body)
                     .padding(.horizontal, 14)
                     .padding(.vertical, 10)
                     .background(.blue, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
@@ -62,8 +64,9 @@ private struct ChatBubbleView: View {
 
         case .assistantMessage(_, let text, let sources, let traceCalls):
             VStack(alignment: .leading, spacing: 6) {
-                Text((try? AttributedString(markdown: text, options: .init(interpretedSyntax: .inlineOnlyPreservingWhitespace))) ?? AttributedString(text))
-                    .textSelection(.enabled)
+                StructuredText(markdown: text)
+                    .textual.textSelection(.enabled)
+                    .textual.fontScale(appState.fontScale)
                     .padding(.horizontal, 14)
                     .padding(.vertical, 10)
                     .background(.quaternary, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
@@ -82,7 +85,7 @@ private struct ChatBubbleView: View {
                                 Label("\(traceCalls.count) step\(traceCalls.count == 1 ? "" : "s")", systemImage: "list.bullet.rectangle")
                             }
                         }
-                        .font(.caption)
+                        .appFont(.caption)
                         .foregroundStyle(.secondary)
                     }
                     .buttonStyle(.plain)
@@ -103,7 +106,7 @@ private struct MilestoneBubble: View {
                 .frame(width: 16, height: 16)
             Text(text)
                 .foregroundStyle(.secondary)
-                .font(.callout)
+                .appFont(.callout)
         }
         .padding(.horizontal, 14)
         .padding(.vertical, 10)

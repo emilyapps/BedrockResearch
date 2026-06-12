@@ -44,6 +44,9 @@ struct ContentView: View {
                     .environment(appState)
             }
         }
+        .sheet(isPresented: $appState.helpShown) {
+            HelpView()
+        }
     }
 }
 

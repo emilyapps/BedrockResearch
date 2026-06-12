@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		C80D8CCA2FDA62D400FF0298 /* Textual in Frameworks */ = {isa = PBXBuildFile; productRef = C80D8CC92FDA62D400FF0298 /* Textual */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		C80D8C962FD8412100FF0298 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -52,6 +56,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C80D8CCA2FDA62D400FF0298 /* Textual in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -112,6 +117,7 @@
 			);
 			name = BedrockResearch;
 			packageProductDependencies = (
+				C80D8CC92FDA62D400FF0298 /* Textual */,
 			);
 			productName = BedrockResearch;
 			productReference = C80D8C862FD8411F00FF0298 /* BedrockResearch.app */;
@@ -195,6 +201,9 @@
 			);
 			mainGroup = C80D8C7D2FD8411F00FF0298;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				C80D8CC82FDA62D400FF0298 /* XCRemoteSwiftPackageReference "textual" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = C80D8C872FD8411F00FF0298 /* Products */;
 			projectDirPath = "";
@@ -625,6 +634,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		C80D8CC82FDA62D400FF0298 /* XCRemoteSwiftPackageReference "textual" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/gonzalezreal/textual";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.3.1;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		C80D8CC92FDA62D400FF0298 /* Textual */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C80D8CC82FDA62D400FF0298 /* XCRemoteSwiftPackageReference "textual" */;
+			productName = Textual;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = C80D8C7E2FD8411F00FF0298 /* Project object */;
 }

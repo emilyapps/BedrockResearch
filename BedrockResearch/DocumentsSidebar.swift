@@ -39,12 +39,12 @@ private struct DocumentRow: View {
         VStack(alignment: .leading, spacing: 3) {
             Text(doc.title)
                 .lineLimit(2)
-                .font(.body)
+                .appFont(.body)
             HStack(spacing: 6) {
-                if let year = doc.year { Text(String(year)).font(.caption).foregroundStyle(.secondary) }
-                if let t = doc.docType { Text(t).font(.caption).foregroundStyle(.secondary) }
+                if let year = doc.year { Text(String(year)).appFont(.caption).foregroundStyle(.secondary) }
+                if let t = doc.docType { Text(t).appFont(.caption).foregroundStyle(.secondary) }
                 Spacer()
-                Text(doc.shortName).font(.caption2).foregroundStyle(.tertiary)
+                Text(doc.shortName).appFont(.caption2).foregroundStyle(.tertiary)
             }
         }
         .padding(.vertical, 2)
@@ -63,7 +63,7 @@ private struct DocumentDetailSheet: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             HStack {
-                Text(doc.title).font(.title2).bold()
+                Text(doc.title).appFont(.title2.bold())
                 Spacer()
                 Button("Done") { dismiss() }
             }

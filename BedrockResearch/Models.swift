@@ -1,4 +1,5 @@
 import Foundation
+import SwiftUI
 
 // MARK: - Server / connection
 
@@ -155,6 +156,7 @@ enum Recipe: String, CaseIterable, Identifiable {
     case thorough    = "Thorough"
     case perspectives = "Perspectives"
     case decompose   = "Decompose"
+    case outline     = "Outline"
 
     var id: String { rawValue }
 
@@ -165,6 +167,40 @@ enum Recipe: String, CaseIterable, Identifiable {
         case .thorough:     return "search_thorough"
         case .perspectives: return "search_perspectives"
         case .decompose:    return "decompose"
+        case .outline:      return "outline_document"
+        }
+    }
+
+    var helpText: String {
+        switch self {
+        case .auto:         return "Let the assistant pick the best approach for your question."
+        case .factual:      return "Quick, focused answer from a small set of top passages."
+        case .thorough:     return "Deeper search across more passages for a more complete answer."
+        case .perspectives: return "Surface multiple viewpoints or points of disagreement across sources."
+        case .decompose:    return "Break the question into sub-questions and synthesize an answer from each."
+        case .outline:      return "Structural outline of a single document."
+        }
+    }
+}
+
+// MARK: - Accessibility
+
+extension DynamicTypeSize {
+    var displayName: String {
+        switch self {
+        case .xSmall: return "Extra Small"
+        case .small: return "Small"
+        case .medium: return "Medium"
+        case .large: return "Large (Default)"
+        case .xLarge: return "Extra Large"
+        case .xxLarge: return "XX Large"
+        case .xxxLarge: return "XXX Large"
+        case .accessibility1: return "Accessibility 1"
+        case .accessibility2: return "Accessibility 2"
+        case .accessibility3: return "Accessibility 3"
+        case .accessibility4: return "Accessibility 4"
+        case .accessibility5: return "Accessibility 5"
+        @unknown default: return "Default"
         }
     }
 }

@@ -91,15 +91,15 @@ private struct SessionRow: View {
         VStack(alignment: .leading, spacing: 3) {
             Text(session.firstQuery)
                 .lineLimit(2)
-                .font(.body)
+                .appFont(.body)
             HStack {
                 Text(dateString)
                     .foregroundStyle(.secondary)
-                    .font(.caption)
+                    .appFont(.caption)
                 Spacer()
                 Text("\(session.messageCount) msgs")
                     .foregroundStyle(.secondary)
-                    .font(.caption)
+                    .appFont(.caption)
             }
         }
         .padding(.vertical, 2)

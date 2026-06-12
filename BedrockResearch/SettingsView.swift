@@ -13,6 +13,25 @@ struct SettingsView: View {
                 SecureField("API Token (optional)", text: $appState.apiToken)
             }
 
+            Section("Accessibility") {
+                VStack(alignment: .leading, spacing: 8) {
+                    HStack {
+                        Text("Text Size")
+                        Spacer()
+                        Text(appState.dynamicTypeSize.displayName)
+                            .foregroundStyle(.secondary)
+                    }
+                    Slider(
+                        value: Binding(
+                            get: { Double(appState.dynamicTypeSizeIndex) },
+                            set: { appState.dynamicTypeSizeIndex = Int($0.rounded()) }
+                        ),
+                        in: 0...Double(DynamicTypeSize.allCases.count - 1),
+                        step: 1
+                    )
+                }
+            }
+
             Section {
                 HStack {
                     Button("Test Connection") {

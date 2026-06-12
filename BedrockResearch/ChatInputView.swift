@@ -28,32 +28,39 @@ struct ChatInputView: View {
 
             HStack(alignment: .bottom, spacing: 8) {
                 // Add filter button
-                Button {
-                    appState.filterPopoverShown = true
-                } label: {
-                    Image(systemName: appState.activeFilter.isEmpty ? "line.3.horizontal.decrease.circle" : "line.3.horizontal.decrease.circle.fill")
-                        .foregroundStyle(appState.activeFilter.isEmpty ? Color.secondary : Color.blue)
-                        .imageScale(.large)
-                }
-                .buttonStyle(.plain)
-                .popover(isPresented: $appState.filterPopoverShown) {
-                    FilterPopover(filterText: $filterText) { clauses in
-                        appState.applyFilter(clauses)
-                        appState.filterPopoverShown = false
-                        filterText = ""
+                HStack(spacing: 0) {
+                    Button {
+                        appState.filterPopoverShown = true
+                    } label: {
+                        Image(systemName: appState.activeFilter.isEmpty ? "line.3.horizontal.decrease.circle" : "line.3.horizontal.decrease.circle.fill")
+                            .foregroundStyle(appState.activeFilter.isEmpty ? Color.secondary : Color.blue)
+                            .imageScale(.large)
+                    }
+                    .buttonStyle(.plain)
+                    .popover(isPresented: $appState.filterPopoverShown) {
+                        FilterPopover(filterText: $filterText) { clauses in
+                            appState.applyFilter(clauses)
+                            appState.filterPopoverShown = false
+                            filterText = ""
+                        }
                     }
                 }
+                .help(appState.activeFilter.isEmpty
+                    ? "Filter results by document metadata (year, doc_type, short_name)"
+                    : "Filter active — only matching documents are searched")
 
                 // Auto-expanding text input
                 ZStack(alignment: .leading) {
                     if inputText.isEmpty {
                         Text("Ask a question…")
+                            .appFont(.body)
                             .foregroundStyle(.tertiary)
                             .padding(.horizontal, 4)
                             .allowsHitTesting(false)
                     }
                     TextEditor(text: $inputText)
-                        .frame(minHeight: 36, maxHeight: 140)
+                        .appFont(.body)
+                        .frame(minHeight: 22, maxHeight: 80)
                         .scrollContentBackground(.hidden)
                         .focused($inputFocused)
                         .onKeyPress(.return) {
@@ -70,27 +77,31 @@ struct ChatInputView: View {
 
                 // Recipe picker + send
                 HStack(spacing: 4) {
-                    Menu {
-                        ForEach(Recipe.allCases) { recipe in
-                            Button {
-                                appState.selectedRecipe = recipe
-                            } label: {
-                                HStack {
-                                    Text(recipe.rawValue)
-                                    if appState.selectedRecipe == recipe {
-                                        Image(systemName: "checkmark")
+                    HStack(spacing: 0) {
+                        Menu {
+                            ForEach(Recipe.allCases) { recipe in
+                                let outlineDisabled = recipe == .outline && appState.filteredShortName == nil
+                                Button {
+                                    appState.selectedRecipe = recipe
+                                } label: {
+                                    HStack {
+                                        Text(recipe.rawValue)
+                                        if appState.selectedRecipe == recipe {
+                                            Image(systemName: "checkmark")
+                                        }
                                     }
                                 }
+                                .disabled(outlineDisabled)
                             }
+                        } label: {
+                            Image(systemName: "chevron.up.chevron.down")
+                                .imageScale(.small)
+                                .foregroundStyle(.secondary)
                         }
-                    } label: {
-                        Image(systemName: "chevron.up.chevron.down")
-                            .imageScale(.small)
-                            .foregroundStyle(.secondary)
+                        .menuStyle(.button)
+                        .buttonStyle(.plain)
                     }
-                    .menuStyle(.button)
-                    .buttonStyle(.plain)
-                    .help("Recipe: \(appState.selectedRecipe.rawValue)")
+                    .help("Select search tool, or let the assistant pick the best approach for your question (Auto).")
 
                     Button {
                         submit()
@@ -130,7 +141,7 @@ private struct FilterChip: View {
     var body: some View {
         HStack(spacing: 4) {
             Text("\(clause.key) \(clause.op) \(clause.value)")
-                .font(.caption)
+                .appFont(.caption)
             Button(action: onRemove) {
                 Image(systemName: "xmark")
                     .imageScale(.small)
@@ -141,6 +152,7 @@ private struct FilterChip: View {
         .padding(.vertical, 4)
         .background(.blue.opacity(0.15), in: Capsule())
         .foregroundStyle(.blue)
+        .help("Only documents where \(clause.key) \(clause.op) \(clause.value) are searched")
     }
 }
 
@@ -152,19 +164,20 @@ private struct FilterPopover: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Add filter").font(.headline)
+            Text("Add filter").appFont(.headline)
 
             TextField("e.g. year >= 2010", text: $filterText)
+                .appFont(.body)
                 .textFieldStyle(.roundedBorder)
                 .onSubmit { trySubmit() }
                 .frame(width: 220)
 
             Text("Fields: year, doc_type, short_name\nOperators: =, >=, <=, !=")
-                .font(.caption)
+                .appFont(.caption)
                 .foregroundStyle(.secondary)
 
             if let err = error {
-                Text(err).font(.caption).foregroundStyle(.red)
+                Text(err).appFont(.caption).foregroundStyle(.red)
             }
 
             HStack {

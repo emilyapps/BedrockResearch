@@ -34,27 +34,27 @@ struct SourceNodeRow: View {
         VStack(alignment: .leading, spacing: 6) {
             HStack(alignment: .firstTextBaseline, spacing: 6) {
                 Text("#\(node.rank)")
-                    .font(.caption.bold())
+                    .appFont(.caption.bold())
                     .foregroundStyle(.white)
                     .padding(.horizontal, 6)
                     .padding(.vertical, 2)
                     .background(.blue, in: Capsule())
 
                 Text(node.shortName ?? node.file)
-                    .font(.callout.bold())
+                    .appFont(.callout.bold())
                     .lineLimit(1)
 
                 Spacer()
 
                 if let score = node.score {
                     Text(String(format: "%.3f", score))
-                        .font(.caption)
+                        .appFont(.caption)
                         .foregroundStyle(.secondary)
                 }
             }
 
             Text(expanded ? node.text : String(node.text.prefix(150)) + (node.text.count > 150 ? "…" : ""))
-                .font(.caption)
+                .appFont(.caption)
                 .foregroundStyle(.secondary)
                 .lineLimit(expanded ? nil : 4)
                 .fixedSize(horizontal: false, vertical: true)
@@ -63,7 +63,7 @@ struct SourceNodeRow: View {
                 Button(expanded ? "Show less" : "Show more") {
                     withAnimation { expanded.toggle() }
                 }
-                .font(.caption)
+                .appFont(.caption)
                 .buttonStyle(.plain)
                 .foregroundStyle(.blue)
             }

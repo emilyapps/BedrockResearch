@@ -38,7 +38,7 @@ struct TracePanel: View {
                 Text("llm: \(appState.llmModel)")
             }
         }
-        .font(.caption2)
+        .appFont(.caption2)
         .foregroundStyle(.secondary)
         .padding(.vertical, 6)
     }
@@ -78,10 +78,10 @@ private struct TraceCallRow: View {
         } else {
             HStack(alignment: .firstTextBaseline, spacing: 6) {
                 Text("#\(call.index + 1)")
-                    .font(.caption.bold())
+                    .appFont(.caption.bold())
                     .foregroundStyle(.secondary)
                 Text(summaryText)
-                    .font(.caption)
+                    .appFont(.caption)
                     .foregroundStyle(.secondary)
             }
             .padding(.vertical, 2)
@@ -91,14 +91,14 @@ private struct TraceCallRow: View {
     private var header: some View {
         HStack(alignment: .firstTextBaseline, spacing: 6) {
             Text("#\(call.index + 1)")
-                .font(.caption.bold())
+                .appFont(.caption.bold())
                 .foregroundStyle(.white)
                 .padding(.horizontal, 6)
                 .padding(.vertical, 2)
                 .background(.blue, in: Capsule())
 
             Text((call.tool ?? "").replacingOccurrences(of: "_", with: " "))
-                .font(.callout.bold())
+                .appFont(.callout.bold())
         }
     }
 
@@ -117,18 +117,18 @@ private struct TraceCallRow: View {
         if let filters = call.filters {
             HStack(alignment: .top, spacing: 6) {
                 Text("Filters")
-                    .font(.caption.bold())
+                    .appFont(.caption.bold())
                     .foregroundStyle(.secondary)
                     .frame(width: 64, alignment: .trailing)
                 if filters.isEmpty {
                     Text("none inferred")
-                        .font(.caption)
+                        .appFont(.caption)
                         .foregroundStyle(.secondary)
                 } else {
                     VStack(alignment: .leading, spacing: 2) {
                         ForEach(filters) { f in
                             Text("\(f.key) \(f.op) \(f.value)")
-                                .font(.caption)
+                                .appFont(.caption)
                                 .padding(.horizontal, 6)
                                 .padding(.vertical, 2)
                                 .background(.blue.opacity(0.1), in: Capsule())
@@ -137,7 +137,7 @@ private struct TraceCallRow: View {
                 }
                 if call.filterFallback == true {
                     Text("fallback: unfiltered")
-                        .font(.caption2)
+                        .appFont(.caption2)
                         .foregroundStyle(.orange)
                 }
             }
@@ -149,12 +149,12 @@ private struct TraceCallRow: View {
         if let variants = call.variants, !variants.isEmpty {
             HStack(alignment: .top, spacing: 6) {
                 Text("Variants")
-                    .font(.caption.bold())
+                    .appFont(.caption.bold())
                     .foregroundStyle(.secondary)
                     .frame(width: 64, alignment: .trailing)
                 VStack(alignment: .leading, spacing: 2) {
                     ForEach(Array(variants.enumerated()), id: \.offset) { _, v in
-                        Text(v).font(.caption)
+                        Text(v).appFont(.caption)
                     }
                 }
             }
@@ -166,12 +166,12 @@ private struct TraceCallRow: View {
         if let subQs = call.subQuestions, !subQs.isEmpty {
             HStack(alignment: .top, spacing: 6) {
                 Text("Sub-questions")
-                    .font(.caption.bold())
+                    .appFont(.caption.bold())
                     .foregroundStyle(.secondary)
                     .frame(width: 64, alignment: .trailing)
                 VStack(alignment: .leading, spacing: 2) {
                     ForEach(Array(subQs.enumerated()), id: \.offset) { i, sq in
-                        Text("\(i + 1). \(sq)").font(.caption)
+                        Text("\(i + 1). \(sq)").appFont(.caption)
                     }
                 }
             }
@@ -184,11 +184,11 @@ private struct TraceCallRow: View {
             VStack(alignment: .leading, spacing: 4) {
                 HStack(alignment: .top, spacing: 6) {
                     Text("Answer")
-                        .font(.caption.bold())
+                        .appFont(.caption.bold())
                         .foregroundStyle(.secondary)
                         .frame(width: 64, alignment: .trailing)
                     Text(answerExpanded ? answer : String(answer.prefix(150)) + (answer.count > 150 ? "…" : ""))
-                        .font(.caption)
+                        .appFont(.caption)
                         .foregroundStyle(.secondary)
                         .fixedSize(horizontal: false, vertical: true)
                 }
@@ -196,7 +196,7 @@ private struct TraceCallRow: View {
                     Button(answerExpanded ? "Show less" : "Show more") {
                         withAnimation { answerExpanded.toggle() }
                     }
-                    .font(.caption)
+                    .appFont(.caption)
                     .buttonStyle(.plain)
                     .foregroundStyle(.blue)
                     .padding(.leading, 70)
@@ -219,18 +219,18 @@ private struct TraceCallRow: View {
                 }
                 .padding(.leading, 8)
             }
-            .font(.caption)
+            .appFont(.caption)
         }
     }
 
     private func labeledRow(_ label: String, _ value: String) -> some View {
         HStack(alignment: .top, spacing: 6) {
             Text(label)
-                .font(.caption.bold())
+                .appFont(.caption.bold())
                 .foregroundStyle(.secondary)
                 .frame(width: 64, alignment: .trailing)
             Text(value)
-                .font(.caption)
+                .appFont(.caption)
         }
     }
 }

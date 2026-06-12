@@ -98,12 +98,14 @@ actor APIClient {
     func query(
         text: String,
         sessionId: String?,
-        tool: String?
+        tool: String?,
+        shortName: String? = nil
     ) -> (stream: AsyncThrowingStream<SSEEvent, Error>, sessionIdHeader: () -> String?) {
         struct QueryBody: Encodable {
             let query: String
             let session_id: String?
             let tool: String?
+            let short_name: String?
         }
 
         var capturedSessionId: String? = nil
@@ -119,7 +121,7 @@ actor APIClient {
                     if !self.apiToken.isEmpty {
                         req.setValue("Bearer \(self.apiToken)", forHTTPHeaderField: "Authorization")
                     }
-                    req.httpBody = try JSONEncoder().encode(QueryBody(query: text, session_id: sessionId, tool: tool))
+                    req.httpBody = try JSONEncoder().encode(QueryBody(query: text, session_id: sessionId, tool: tool, short_name: shortName))
                     req.setValue("application/json", forHTTPHeaderField: "Content-Type")
 
                     let (bytes, response) = try await URLSession.shared.bytes(for: req)

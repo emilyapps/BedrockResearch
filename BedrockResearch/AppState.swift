@@ -1,5 +1,6 @@
 import Foundation
 import Observation
+import SwiftUI
 
 @Observable
 final class AppState {
@@ -57,6 +58,11 @@ final class AppState {
     var activeFilter: [FilterClause] = []
     var filterPopoverShown: Bool = false
 
+    /// short_name from activeFilter, if the filter narrows to exactly one document.
+    var filteredShortName: String? {
+        activeFilter.first(where: { $0.key == "short_name" && $0.op == "=" })?.value
+    }
+
     // MARK: - Recipe
 
     var selectedRecipe: Recipe = .auto
@@ -64,6 +70,30 @@ final class AppState {
     // MARK: - Settings sheet
 
     var settingsShown: Bool = false
+    var helpShown: Bool = false
+
+    // MARK: - Accessibility
+
+    var dynamicTypeSizeIndex: Int = {
+        if let stored = UserDefaults.standard.object(forKey: "dynamicTypeSizeIndex") as? Int {
+            return stored
+        }
+        return DynamicTypeSize.allCases.firstIndex(of: .large) ?? 0
+    }() {
+        didSet { UserDefaults.standard.set(dynamicTypeSizeIndex, forKey: "dynamicTypeSizeIndex") }
+    }
+
+    var dynamicTypeSize: DynamicTypeSize {
+        let cases = DynamicTypeSize.allCases
+        return cases[min(max(dynamicTypeSizeIndex, 0), cases.count - 1)]
+    }
+
+    /// Multiplier for Textual's `.fontScale()`, used for chat message text.
+    /// `.environment(\.dynamicTypeSize, ...)` has no effect on Textual's rendering on macOS,
+    /// so chat text size is driven by this scale factor instead. 1.0 == default (index 3, .large).
+    var fontScale: CGFloat {
+        1.0 + (CGFloat(dynamicTypeSizeIndex) - 3.0) * 0.12
+    }
 
     // MARK: - API client
 
@@ -136,11 +166,12 @@ final class AppState {
 
         let sessionId = currentSessionId
         let toolName = selectedRecipe.toolName
+        let shortName = selectedRecipe == .outline ? filteredShortName : nil
 
         Task { @MainActor in
             var toolSelectedCount = 0
 
-            let (stream, sessionIdHeader) = await client.query(text: text, sessionId: sessionId, tool: toolName)
+            let (stream, sessionIdHeader) = await client.query(text: text, sessionId: sessionId, tool: toolName, shortName: shortName)
 
             do {
                 for try await event in stream {
@@ -226,12 +257,18 @@ final class AppState {
 
     func applyFilter(_ clauses: [FilterClause]) {
         activeFilter = clauses
+        if selectedRecipe == .outline && filteredShortName == nil {
+            selectedRecipe = .auto
+        }
         guard let sid = currentSessionId else { return }
         Task { try? await client.putFilter(sid, filters: clauses) }
     }
 
     func clearFilter() {
         activeFilter = []
+        if selectedRecipe == .outline {
+            selectedRecipe = .auto
+        }
         guard let sid = currentSessionId else { return }
         Task { try? await client.deleteFilter(sid) }
     }
