@@ -15,7 +15,7 @@ struct BedrockResearchApp: App {
                 }
         }
         .commands {
-            CommandGroup(after: .newItem) {
+            CommandGroup(replacing: .newItem) {
                 Button("New Chat") {
                     appState.newChat()
                 }
