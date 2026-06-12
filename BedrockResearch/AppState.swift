@@ -31,6 +31,7 @@ final class AppState {
 
     var currentSessionId: String? = nil
     var queryInFlight: Bool = false
+    private var queryCancel: (() -> Void)? = nil
 
     // MARK: - Chat
 
@@ -171,7 +172,8 @@ final class AppState {
         Task { @MainActor in
             var toolSelectedCount = 0
 
-            let (stream, sessionIdHeader) = await client.query(text: text, sessionId: sessionId, tool: toolName, shortName: shortName)
+            let (stream, sessionIdHeader, cancel) = await client.query(text: text, sessionId: sessionId, tool: toolName, shortName: shortName)
+            self.queryCancel = cancel
 
             do {
                 for try await event in stream {
@@ -218,15 +220,23 @@ final class AppState {
                 }
             } catch {
                 self.pendingMilestone = nil
-                let errId = UUID()
-                self.chatEntries.append(.assistantMessage(id: errId, text: "⚠️ \(error.localizedDescription)", sources: [], traceCalls: []))
+                let isCancellation = error is CancellationError || (error as? URLError)?.code == .cancelled
+                if !isCancellation {
+                    let errId = UUID()
+                    self.chatEntries.append(.assistantMessage(id: errId, text: "⚠️ \(error.localizedDescription)", sources: [], traceCalls: []))
+                }
             }
 
             if self.currentSessionId == nil, let sid = sessionIdHeader() {
                 self.currentSessionId = sid
             }
+            self.queryCancel = nil
             self.queryInFlight = false
         }
+    }
+
+    func cancelQuery() {
+        queryCancel?()
     }
 
     func newChat() {

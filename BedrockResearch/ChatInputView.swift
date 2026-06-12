@@ -70,6 +70,11 @@ struct ChatInputView: View {
                             submit()
                             return .handled
                         }
+                        .onKeyPress(.escape) {
+                            guard appState.queryInFlight else { return .ignored }
+                            appState.cancelQuery()
+                            return .handled
+                        }
                 }
                 .padding(.horizontal, 4)
                 .padding(.vertical, 6)
@@ -104,14 +109,18 @@ struct ChatInputView: View {
                     .help("Select search tool, or let the assistant pick the best approach for your question (Auto).")
 
                     Button {
-                        submit()
+                        if appState.queryInFlight {
+                            appState.cancelQuery()
+                        } else {
+                            submit()
+                        }
                     } label: {
-                        Image(systemName: "arrow.up.circle.fill")
+                        Image(systemName: appState.queryInFlight ? "stop.circle.fill" : "arrow.up.circle.fill")
                             .imageScale(.large)
-                            .foregroundStyle(canSend ? Color.blue : Color.secondary.opacity(0.5))
+                            .foregroundStyle(appState.queryInFlight || canSend ? Color.blue : Color.secondary.opacity(0.5))
                     }
                     .buttonStyle(.plain)
-                    .disabled(!canSend)
+                    .disabled(!canSend && !appState.queryInFlight)
                     .keyboardShortcut(.return, modifiers: [])
                 }
             }

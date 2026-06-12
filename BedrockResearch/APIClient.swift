@@ -100,7 +100,7 @@ actor APIClient {
         sessionId: String?,
         tool: String?,
         shortName: String? = nil
-    ) -> (stream: AsyncThrowingStream<SSEEvent, Error>, sessionIdHeader: () -> String?) {
+    ) -> (stream: AsyncThrowingStream<SSEEvent, Error>, sessionIdHeader: () -> String?, cancel: () -> Void) {
         struct QueryBody: Encodable {
             let query: String
             let session_id: String?
@@ -109,9 +109,10 @@ actor APIClient {
         }
 
         var capturedSessionId: String? = nil
+        var task: Task<Void, Never>? = nil
 
         let stream = AsyncThrowingStream<SSEEvent, Error> { continuation in
-            Task {
+            task = Task {
                 do {
                     var req = URLRequest(url: URL(string: self.base + "/query")!)
                     req.httpMethod = "POST"
@@ -172,7 +173,7 @@ actor APIClient {
             }
         }
 
-        return (stream, { capturedSessionId })
+        return (stream, { capturedSessionId }, { task?.cancel() })
     }
 
     // MARK: - SSE parsing
