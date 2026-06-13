@@ -33,7 +33,7 @@ struct ChatInputView: View {
                         appState.filterPopoverShown = true
                     } label: {
                         Image(systemName: appState.activeFilter.isEmpty ? "line.3.horizontal.decrease.circle" : "line.3.horizontal.decrease.circle.fill")
-                            .foregroundStyle(appState.activeFilter.isEmpty ? Color.secondary : Color.blue)
+                            .foregroundStyle(appState.activeFilter.isEmpty ? Color.secondary : appState.accentColor)
                             .imageScale(.large)
                     }
                     .buttonStyle(.plain)
@@ -117,7 +117,7 @@ struct ChatInputView: View {
                     } label: {
                         Image(systemName: appState.queryInFlight ? "stop.circle.fill" : "arrow.up.circle.fill")
                             .imageScale(.large)
-                            .foregroundStyle(appState.queryInFlight || canSend ? Color.blue : Color.secondary.opacity(0.5))
+                            .foregroundStyle(appState.queryInFlight || canSend ? appState.accentColor : Color.secondary.opacity(0.5))
                     }
                     .buttonStyle(.plain)
                     .disabled(!canSend && !appState.queryInFlight)
@@ -144,6 +144,7 @@ struct ChatInputView: View {
 }
 
 private struct FilterChip: View {
+    @Environment(AppState.self) private var appState
     let clause: FilterClause
     let onRemove: () -> Void
 
@@ -159,8 +160,8 @@ private struct FilterChip: View {
         }
         .padding(.horizontal, 8)
         .padding(.vertical, 4)
-        .background(.blue.opacity(0.15), in: Capsule())
-        .foregroundStyle(.blue)
+        .background(appState.accentColor.opacity(0.15), in: Capsule())
+        .foregroundStyle(appState.accentColor)
         .help("Only documents where \(clause.key) \(clause.op) \(clause.value) are searched")
     }
 }

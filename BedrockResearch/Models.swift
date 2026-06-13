@@ -210,6 +210,44 @@ extension DynamicTypeSize {
     }
 }
 
+// MARK: - Appearance
+
+enum AppTheme: String, CaseIterable, Identifiable {
+    case ocean, forest, sunset, midnight, indigo
+
+    var id: String { rawValue }
+
+    var displayName: String {
+        switch self {
+        case .ocean: return "Ocean"
+        case .forest: return "Forest"
+        case .sunset: return "Sunset"
+        case .midnight: return "Midnight"
+        case .indigo: return "Indigo"
+        }
+    }
+
+    var accentColor: Color {
+        switch self {
+        case .ocean: return Color(red: 0.14, green: 0.48, blue: 0.68)
+        case .forest: return Color(red: 0.24, green: 0.56, blue: 0.31)
+        case .sunset: return Color(red: 0.88, green: 0.45, blue: 0.20)
+        case .midnight: return Color(red: 0.52, green: 0.43, blue: 0.82)
+        case .indigo: return Color(red: 0.29, green: 0.33, blue: 0.78)
+        }
+    }
+
+    /// Each theme has a fixed appearance. Avoid `nil` ("follow system") here — toggling
+    /// between `nil` and an explicit value leaves NSWindow's appearance stuck on macOS,
+    /// so vibrancy materials only refresh on the next window-activation event.
+    var colorScheme: ColorScheme? {
+        switch self {
+        case .midnight, .indigo: return .dark
+        case .ocean, .forest, .sunset: return .light
+        }
+    }
+}
+
 // MARK: - SSE events
 
 enum SSEEvent {

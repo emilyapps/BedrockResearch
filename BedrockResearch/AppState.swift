@@ -89,6 +89,16 @@ final class AppState {
         return cases[min(max(dynamicTypeSizeIndex, 0), cases.count - 1)]
     }
 
+    // MARK: - Appearance
+
+    var theme: AppTheme = AppTheme(rawValue: UserDefaults.standard.string(forKey: "theme") ?? "") ?? .ocean {
+        didSet { UserDefaults.standard.set(theme.rawValue, forKey: "theme") }
+    }
+
+    var accentColor: Color {
+        theme.accentColor
+    }
+
     /// Multiplier for Textual's `.fontScale()`, used for chat message text.
     /// `.environment(\.dynamicTypeSize, ...)` has no effect on Textual's rendering on macOS,
     /// so chat text size is driven by this scale factor instead. 1.0 == default (index 3, .large).

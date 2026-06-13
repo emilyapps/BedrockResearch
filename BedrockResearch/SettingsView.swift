@@ -32,6 +32,35 @@ struct SettingsView: View {
                 }
             }
 
+            Section("Appearance") {
+                HStack(spacing: 16) {
+                    ForEach(AppTheme.allCases) { theme in
+                        Button {
+                            appState.theme = theme
+                        } label: {
+                            VStack(spacing: 6) {
+                                Circle()
+                                    .fill(theme.accentColor)
+                                    .frame(width: 28, height: 28)
+                                    .overlay {
+                                        if appState.theme == theme {
+                                            Circle()
+                                                .strokeBorder(.primary, lineWidth: 2)
+                                                .padding(-3)
+                                        }
+                                    }
+                                Text(theme.displayName)
+                                    .appFont(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+                        }
+                        .buttonStyle(.plain)
+                    }
+                    Spacer()
+                }
+                .padding(.vertical, 4)
+            }
+
             Section {
                 HStack {
                     Button("Test Connection") {

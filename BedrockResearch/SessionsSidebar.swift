@@ -2,6 +2,8 @@ import SwiftUI
 
 struct SessionsSidebar: View {
     @Environment(AppState.self) private var appState
+    @State private var sessionToDelete: SessionSummary? = nil
+    @State private var showDeleteConfirm = false
 
     var body: some View {
         List(appState.sessions, selection: Binding(
@@ -15,6 +17,11 @@ struct SessionsSidebar: View {
                 }
                 .contextMenu {
                     Button("Resume Session") { resumeSession(session) }
+                    Divider()
+                    Button("Delete Session", role: .destructive) {
+                        sessionToDelete = session
+                        showDeleteConfirm = true
+                    }
                 }
         }
         .listStyle(.sidebar)
@@ -23,6 +30,14 @@ struct SessionsSidebar: View {
                 ContentUnavailableView("No Saved Sessions", systemImage: "clock.arrow.circlepath",
                                        description: Text("Sessions are saved when you start a new chat."))
             }
+        }
+        .alert("Delete this session?", isPresented: $showDeleteConfirm, presenting: sessionToDelete) { session in
+            Button("Delete", role: .destructive) {
+                deleteSession(session)
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: { session in
+            Text("\"\(session.firstQuery)\" will be permanently deleted. This can't be undone.")
         }
     }
 
@@ -73,9 +88,20 @@ struct SessionsSidebar: View {
             }
         }
     }
+
+    private func deleteSession(_ session: SessionSummary) {
+        Task { @MainActor in
+            try? await appState.client.deleteSavedSession(session.id)
+            appState.sessions.removeAll { $0.id == session.id }
+            if appState.selectedSession?.id == session.id {
+                appState.selectedSession = nil
+            }
+        }
+    }
 }
 
 private struct SessionRow: View {
+    @Environment(AppState.self) private var appState
     let session: SessionSummary
 
     private var dateString: String {
@@ -88,20 +114,28 @@ private struct SessionRow: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 3) {
-            Text(session.firstQuery)
-                .lineLimit(2)
-                .appFont(.body)
-            HStack {
-                Text(dateString)
-                    .foregroundStyle(.secondary)
-                    .appFont(.caption)
-                Spacer()
-                Text("\(session.messageCount) msgs")
-                    .foregroundStyle(.secondary)
-                    .appFont(.caption)
+        HStack(alignment: .top, spacing: 10) {
+            Image(systemName: "bubble.left.and.bubble.right.fill")
+                .foregroundStyle(appState.accentColor)
+                .imageScale(.medium)
+                .frame(width: 18, height: 18)
+                .padding(.top, 1)
+
+            VStack(alignment: .leading, spacing: 3) {
+                Text(session.firstQuery)
+                    .lineLimit(2)
+                    .appFont(.body)
+                HStack {
+                    Text(dateString)
+                        .foregroundStyle(.secondary)
+                        .appFont(.caption)
+                    Spacer()
+                    Text("\(session.messageCount) msgs")
+                        .foregroundStyle(.secondary)
+                        .appFont(.caption)
+                }
             }
         }
-        .padding(.vertical, 2)
+        .padding(.vertical, 4)
     }
 }

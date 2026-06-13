@@ -45,6 +45,7 @@ struct TracePanel: View {
 }
 
 private struct TraceCallRow: View {
+    @Environment(AppState.self) private var appState
     let call: TraceCall
     @State private var answerExpanded = false
 
@@ -97,7 +98,7 @@ private struct TraceCallRow: View {
                 .foregroundStyle(.white)
                 .padding(.horizontal, 6)
                 .padding(.vertical, 2)
-                .background(.blue, in: Capsule())
+                .background(appState.accentColor, in: Capsule())
 
             Text((call.tool ?? "").replacingOccurrences(of: "_", with: " "))
                 .appFont(.callout.bold())
@@ -133,7 +134,7 @@ private struct TraceCallRow: View {
                                 .appFont(.caption)
                                 .padding(.horizontal, 6)
                                 .padding(.vertical, 2)
-                                .background(.blue.opacity(0.1), in: Capsule())
+                                .background(appState.accentColor.opacity(0.1), in: Capsule())
                         }
                     }
                 }
@@ -200,7 +201,7 @@ private struct TraceCallRow: View {
                     }
                     .appFont(.caption)
                     .buttonStyle(.plain)
-                    .foregroundStyle(.blue)
+                    .foregroundStyle(appState.accentColor)
                     .padding(.leading, 70)
                 }
             }

@@ -73,6 +73,11 @@ actor APIClient {
         _ = try await URLSession.shared.data(for: req)
     }
 
+    func deleteSavedSession(_ id: String) async throws {
+        let req = try request("/sessions/saved/\(id)", method: "DELETE")
+        _ = try await URLSession.shared.data(for: req)
+    }
+
     // MARK: - Filter
 
     func getFilter(_ sessionId: String) async throws -> [FilterClause] {

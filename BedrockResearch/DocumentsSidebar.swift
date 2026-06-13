@@ -32,22 +32,31 @@ struct DocumentsSidebar: View {
 }
 
 private struct DocumentRow: View {
+    @Environment(AppState.self) private var appState
     let doc: DocumentMeta
     @State private var showDetail = false
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 3) {
-            Text(doc.title)
-                .lineLimit(2)
-                .appFont(.body)
-            HStack(spacing: 6) {
-                if let year = doc.year { Text(String(year)).appFont(.caption).foregroundStyle(.secondary) }
-                if let t = doc.docType { Text(t).appFont(.caption).foregroundStyle(.secondary) }
-                Spacer()
-                Text(doc.shortName).appFont(.caption2).foregroundStyle(.tertiary)
+        HStack(alignment: .top, spacing: 10) {
+            Image(systemName: "book.closed.fill")
+                .foregroundStyle(appState.accentColor)
+                .imageScale(.medium)
+                .frame(width: 18, height: 18)
+                .padding(.top, 1)
+
+            VStack(alignment: .leading, spacing: 3) {
+                Text(doc.title)
+                    .lineLimit(2)
+                    .appFont(.body)
+                HStack(spacing: 6) {
+                    if let year = doc.year { Text(String(year)).appFont(.caption).foregroundStyle(.secondary) }
+                    if let t = doc.docType { Text(t).appFont(.caption).foregroundStyle(.secondary) }
+                    Spacer()
+                    Text(doc.shortName).appFont(.caption2).foregroundStyle(.tertiary)
+                }
             }
         }
-        .padding(.vertical, 2)
+        .padding(.vertical, 4)
         .onTapGesture(count: 2) { showDetail = true }
         .sheet(isPresented: $showDetail) {
             DocumentDetailSheet(doc: doc)

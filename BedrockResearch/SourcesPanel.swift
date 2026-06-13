@@ -27,6 +27,7 @@ struct SourcesPanel: View {
 }
 
 struct SourceNodeRow: View {
+    @Environment(AppState.self) private var appState
     let node: SourceNode
     @State private var expanded = false
 
@@ -38,7 +39,7 @@ struct SourceNodeRow: View {
                     .foregroundStyle(.white)
                     .padding(.horizontal, 6)
                     .padding(.vertical, 2)
-                    .background(.blue, in: Capsule())
+                    .background(appState.accentColor, in: Capsule())
 
                 Text(node.shortName ?? node.file)
                     .appFont(.callout.bold())
@@ -65,7 +66,7 @@ struct SourceNodeRow: View {
                 }
                 .appFont(.caption)
                 .buttonStyle(.plain)
-                .foregroundStyle(.blue)
+                .foregroundStyle(appState.accentColor)
             }
         }
         .padding(.vertical, 4)

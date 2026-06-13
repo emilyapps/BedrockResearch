@@ -47,6 +47,21 @@ struct ContentView: View {
         .sheet(isPresented: $appState.helpShown) {
             HelpView()
         }
+        .background(alignment: .top) {
+            // Subtle accent wash that bleeds up under the toolbar, where the
+            // toolbar's native vibrancy blurs it — restores the blur while
+            // tinting it to match the rest of the app.
+            LinearGradient(
+                colors: [appState.accentColor.opacity(0.25), .clear],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+            .frame(height: 60)
+            .ignoresSafeArea(edges: .top)
+            .allowsHitTesting(false)
+        }
+        .navigationTitle("Bedrock Research")
+        .navigationSubtitle(appState.displayName)
     }
 }
 
@@ -99,7 +114,6 @@ private struct SidebarView: View {
                     .environment(appState)
             }
         }
-        .navigationTitle(appState.displayName.isEmpty ? "Bedrock Research" : appState.displayName)
     }
 }
 

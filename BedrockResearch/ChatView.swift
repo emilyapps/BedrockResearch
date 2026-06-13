@@ -58,7 +58,7 @@ private struct ChatBubbleView: View {
                     .appFont(.body)
                     .padding(.horizontal, 14)
                     .padding(.vertical, 10)
-                    .background(.blue, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+                    .background(appState.accentColor, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
                     .foregroundStyle(.white)
             }
 
